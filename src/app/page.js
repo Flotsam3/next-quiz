@@ -1,11 +1,12 @@
 "use client";
 
 import { useState } from "react";
-
+import { useRouter } from "next/navigation";
 // import Image from "next/image";
 import "./page.scss";
 
 export default function Home() {
+   const router = useRouter();
    const [name, setName] = useState("");
    const [level, setLevel] = useState("easy");
    const [startAnimation, setStartAnimation] = useState(false);
@@ -18,6 +19,11 @@ export default function Home() {
    const [nameClass, setNameClass] = useState(null);
    const [showCube, setShowCube] = useState(true);
    const [scene, setScene] = useState("scene");
+   const [pane, setPane] = useState(false);
+   const [paneClass, setPaneClass] = useState("pane");
+   const [buttonInfo, setButtonInfo] = useState({ visibility: "hidden" });
+   const [aTagClass, setATagClass] = useState(null);
+   const [levelTime, setLevelTime] = useState("45");
 
    function cubeTimeout() {
       setTimeout(() => {
@@ -43,22 +49,27 @@ export default function Home() {
    }
 
    function handleLevelButton() {
-      let levelTime = 0;
-
       switch (level) {
          case "easy":
-            levelTime = 45;
+            setLevelTime("45");
             break;
          case "fair":
-            levelTime = 30;
+            setLevelTime("30");
             break;
          case "challenging":
-            levelTime = 20;
+            setLevelTime("20");
       }
 
       setShowCube(false);
       setCubeTop(null);
       setScene("scene --fade-out");
+
+      setTimeout(() => {
+         setPane(true);
+         setButtonInfo(null);
+         setPaneClass("pane --fade-in");
+         setATagClass("--fade-in");
+      }, 2000);
    }
 
    return (
@@ -132,14 +143,22 @@ export default function Home() {
          </section>
 
          <section className="quiz-info">
-            <div className="pane">
-               <p></p>
+            <div className={paneClass}>
+               <p style={{ whiteSpace: "pre-line" }}>
+                  {pane
+                     ? `Nice to have you here ${name}, 
+                     
+                     during this quiz you will be presented with five terms for each round and your task is to bring all of them into the right order by using drag and drop. Each correctly assigned term will earn you five points. 
+                     
+                     Your preferred level of difficulty is "${level}", therefore you have ${levelTime} seconds to accomplish each round. 
+                     
+                     Have fun!`
+                     : null}
+               </p>
             </div>
-            <a href="main.html">
-               <button id="button-info" style={{ visibility: "hidden" }}>
-                  OK
-               </button>
-            </a>
+            <button id="button-info" style={buttonInfo} onClick={() => router.push("/quiz")}>
+               OK
+            </button>
          </section>
          <footer>
             <small style={startAnimation ? { visibility: "hidden" } : null}>&#169; (2020)</small>

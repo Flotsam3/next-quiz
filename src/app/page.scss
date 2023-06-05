@@ -301,10 +301,6 @@ small {
     width: 100vw;
     background-color: $colour-main-medium;
 
-    a {
-        z-index: 1;
-    }
-
     .pane {
         height: 500px;
         width: 400px;
@@ -327,6 +323,7 @@ small {
     }
     
     #button-info {
+        position: relative;
         height: 40px;
         width: 150px;
         margin-top: 5px;
@@ -339,6 +336,7 @@ small {
         letter-spacing: 0.1rem;
         color: #bbe1fa;
         border-radius: 35px;
+        z-index: 1;
     }
 
     #button-info:hover {
