@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 // import Image from "next/image";
 import "./page.scss";
+import { createUser, getUsers } from "./api";
 
 export default function Home() {
    const router = useRouter();
@@ -22,7 +23,7 @@ export default function Home() {
    const [pane, setPane] = useState(false);
    const [paneClass, setPaneClass] = useState("pane");
    const [buttonInfo, setButtonInfo] = useState({ visibility: "hidden" });
-   const [aTagClass, setATagClass] = useState(null);
+   // const [aTagClass, setATagClass] = useState(null);
    const [levelTime, setLevelTime] = useState("45");
 
    function cubeTimeout() {
@@ -48,7 +49,7 @@ export default function Home() {
       }
    }
 
-   function handleLevelButton() {
+   async function handleLevelButton() {
       switch (level) {
          case "easy":
             setLevelTime("45");
@@ -63,12 +64,14 @@ export default function Home() {
       setShowCube(false);
       setCubeTop(null);
       setScene("scene --fade-out");
+      const user = await createUser({ name, level });
+      sessionStorage.setItem("user", JSON.stringify(user.result));
 
       setTimeout(() => {
          setPane(true);
          setButtonInfo(null);
          setPaneClass("pane --fade-in");
-         setATagClass("--fade-in");
+         // setATagClass("--fade-in");
       }, 2000);
    }
 
@@ -89,6 +92,7 @@ export default function Home() {
                            onClick={() => {
                               setStartAnimation(true);
                               cubeTimeout();
+                              getUsers();
                            }}
                         >
                            Start

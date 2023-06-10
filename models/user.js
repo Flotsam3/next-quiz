@@ -10,7 +10,10 @@ const schema = new mongoose.Schema({
    },
    score: {
       type: Number,
+      default: 0,
    },
 });
 
-export default User = new mongoose.model("quizUser", schema);
+const User = mongoose.models.quizUser || mongoose.model("quizUser", schema);
+
+export default User;
