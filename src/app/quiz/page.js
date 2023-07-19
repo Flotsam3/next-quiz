@@ -4,6 +4,9 @@ import { useEffect, useState } from "react";
 import { getUsers } from "../api";
 import "./page.scss";
 import questionData from "../../../json/data.json" assert { type: "json" };
+import { DndContext, closestCenter } from "@dnd-kit/core";
+import { arrayMove, SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
+import Sortable from "./Sortable";
 
 export default function page() {
    const [data, setData] = useState([]);
@@ -25,8 +28,10 @@ export default function page() {
    const [medal3Class, setMedal3Class] = useState("medal3 hidden");
    const [myTimer, setMyTimer] = useState();
    const [myTimerStyle, setMyTimerStyle] = useState(null);
-   const [solution, setSolution] = useState([]);
+   const [solutionClass, setSolutionClass] = useState("solution");
+   const [solutionStyle, setSolutionStyle] = useState(null);
    const [initeSolution, setIniteSolution] = useState(false);
+   const [answer, setAnswer] = useState([{ solution: "", rank: null, score: 0 }]);
 
    useEffect(() => {
       console.log({ questionData });
@@ -43,10 +48,18 @@ export default function page() {
    }, [user]);
 
    useEffect(() => {
-      if (barText.length > 0) {
-         countdown();
-      }
+      // if (barText.length > 0) {
+      //    countdown();
+      // }
+      console.log({ barText });
    }, [barText]);
+
+   useEffect(() => {
+      if (myTimer <= 1) {
+         console.log({ myTimer });
+         validateAnswers();
+      }
+   }, [solutionStyle]);
 
    const handleButtonCard = () => {};
 
@@ -77,11 +90,17 @@ export default function page() {
       }
       console.log(_barText);
       setBarText(_barText);
+      countdown();
    };
 
    const handleRotateCard = () => {
+      console.log("handleRotateCard");
       if (cardClass === "card__content card--rotate") {
-         setCardClass("card__content");
+         setSolutionStyle(null);
+         setTimeout(() => {
+            setCardClass("card__content");
+         }, 300);
+         console.log("inside if");
 
          if (round + 1 === questionData.length) {
             // If quiz is finished
@@ -109,6 +128,8 @@ export default function page() {
          setButtonCardDisabled(true);
          setButtonCard("button-card-disabled");
          handleShowExerciseInfo();
+         setSolutionStyle(null);
+         setSolutionClass("solution");
          setCardClass("card__content card--rotate");
       }
    };
@@ -131,6 +152,7 @@ export default function page() {
             //      element.setAttribute('draggable', 'false');
             //      element.classList.remove('draggable');
             //  });
+            console.log("before solution");
             showSolution();
          }
       }, 1000);
@@ -145,7 +167,40 @@ export default function page() {
          return result;
       });
       // setSolution(solutionArr);
+      setSolutionStyle({ visibility: "visible" });
+      setSolutionClass("solution solution--slide");
+      setButtonCardDisabled(false);
       console.log({ solutionArr });
+   };
+
+   function validateAnswers() {
+      let score = 0;
+      const validation = barText.map((text, index) => {
+         if (text === questionData[round].options[index]) {
+            score += 5;
+            return { solution: questionData[round].solutions[index], rank: index + 1, score: 5 };
+         }
+         const solutionIndex = questionData[round].options.indexOf(text);
+         return { solution: questionData[round].solutions[solutionIndex], rank: solutionIndex + 1, score: 0 };
+      });
+      console.log("validation, score", [...validation, score]);
+      setAnswer([...validation, score]);
+      setButtonCard("button-card-active");
+      setButtonCardStyle(null);
+   }
+
+   const handleDragEnd = (event) => {
+      console.log("Drag end called");
+      const { active, over } = event;
+
+      if (active.id != over.id && myTimer > 0) {
+         setBarText((text) => {
+            const activeIndex = text.indexOf(active.id);
+            const overIndex = text.indexOf(over.id);
+
+            return arrayMove(text, activeIndex, overIndex);
+         });
+      }
    };
 
    return (
@@ -202,43 +257,15 @@ export default function page() {
                         <i className="fas fa-book-open"></i>
                      </div>
                   </div>
-                  <div className="card__back">
-                     <div className="bar draggable" draggable="true">
-                        {barText[0]}
-                        <span className="solution">
-                           {" "}
-                           <span className="number"></span>
-                        </span>
+                  <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+                     <div className={answer[5] === 25 ? "card__back full-house" : "card__back"}>
+                        <SortableContext items={barText} strategy={verticalListSortingStrategy}>
+                           {barText.map((text, index) => (
+                              <Sortable key={index} text={text} solutionClass={solutionClass} solutionStyle={solutionStyle} answer={answer} index={index} />
+                           ))}
+                        </SortableContext>
                      </div>
-                     <div className="bar draggable" draggable="true">
-                        {barText[1]}
-                        <span className="solution">
-                           {" "}
-                           <span className="number"></span>
-                        </span>
-                     </div>
-                     <div className="bar draggable" draggable="true">
-                        {barText[2]}
-                        <span className="solution">
-                           {" "}
-                           <span className="number"></span>
-                        </span>
-                     </div>
-                     <div className="bar draggable" draggable="true">
-                        {barText[3]}
-                        <span className="solution">
-                           {" "}
-                           <span className="number"></span>
-                        </span>
-                     </div>
-                     <div className="bar draggable" draggable="true">
-                        {barText[4]}
-                        <span className="solution">
-                           {" "}
-                           <span className="number"></span>
-                        </span>
-                     </div>
-                  </div>
+                  </DndContext>
                </div>
             </div>
             <button id="button-card" className={buttonCard} style={buttonCardStyle} disabled={buttonCardDisabled} onClick={handleRotateCard}>
