@@ -1,7 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { getUsers } from "../api";
+import { useEffect, useState, useRef } from "react";
+import { useRouter } from "next/navigation";
+import { getUsers, saveScore } from "../api";
+import Image from "next/image";
+import medal from "../../../public/images/medal.svg";
+import grip from "../../../public/images/grip-lines.svg";
 import "./page.scss";
 import questionData from "../../../json/data.json" assert { type: "json" };
 import { DndContext, closestCenter } from "@dnd-kit/core";
@@ -9,9 +13,11 @@ import { arrayMove, SortableContext, verticalListSortingStrategy } from "@dnd-ki
 import Sortable from "./Sortable";
 
 export default function page() {
+   const audio = new Audio("audio/5-sec-countdown.mp3");
+   const router = useRouter();
    const [data, setData] = useState([]);
    const [user, setUser] = useState({});
-   const [roundText, setRoundText] = useState(questionData.length);
+   const [roundText, setRoundText] = useState("");
    const [round, setRound] = useState(0);
    const [buttonCard, setButtonCard] = useState("button-card-active");
    const [buttonCardDisabled, setButtonCardDisabled] = useState(false);
@@ -19,8 +25,9 @@ export default function page() {
    const [infoText, setInfoText] = useState("Get ready to start");
    const [barText, setBarText] = useState([]);
    const [cardClass, setCardClass] = useState("card__content");
-   const [averageScore, setAverageScore] = useState(0);
+   const [cardBackClass, setCardBackClass] = useState("card__back");
    const [playerScore, setPlayerScore] = useState(0);
+   const [jsScore, setJsScore] = useState(0);
    const [finishedQuiz, setFinishedQuiz] = useState(false);
    const [bookStyle, setBookStyle] = useState(null);
    const [medal1Class, setMedal1Class] = useState("medal1 hidden");
@@ -30,16 +37,22 @@ export default function page() {
    const [myTimerStyle, setMyTimerStyle] = useState(null);
    const [solutionClass, setSolutionClass] = useState("solution");
    const [solutionStyle, setSolutionStyle] = useState(null);
-   const [initeSolution, setIniteSolution] = useState(false);
+   const [highScoresClass, setHighScoresClass] = useState("high-scores");
    const [answer, setAnswer] = useState([{ solution: "", rank: null, score: 0 }]);
+   const jsAnswer = useRef(0);
 
    useEffect(() => {
-      console.log({ questionData });
+      const reload = sessionStorage.getItem("status");
+      if (reload === "started") router.push("/");
+      console.log({ reload });
       (async () => {
          const users = await getUsers();
-         setData(users.result);
+         const sortedUsers = users.result.sort((a, b) => {
+            return b.score - a.score;
+         });
+         const topUsers = sortedUsers.slice(0, 10);
+         setData(topUsers);
       })();
-      console.log("user", user);
       setUser(JSON.parse(sessionStorage.getItem("user")));
    }, []);
 
@@ -48,26 +61,22 @@ export default function page() {
    }, [user]);
 
    useEffect(() => {
-      // if (barText.length > 0) {
-      //    countdown();
-      // }
-      console.log({ barText });
-   }, [barText]);
-
-   useEffect(() => {
-      if (myTimer <= 1) {
-         console.log({ myTimer });
+      if (solutionStyle) {
          validateAnswers();
       }
    }, [solutionStyle]);
 
-   const handleButtonCard = () => {};
-
-   const handleSlideScoreboard = () => {};
+   const handleSlideScoreboard = () => {
+      if (highScoresClass === "high-scores" || highScoresClass === "high-scores slide-scores-out") {
+         setHighScoresClass("high-scores slide-scores-in");
+      } else {
+         setHighScoresClass("high-scores slide-scores-out");
+      }
+   };
 
    const handleShowExerciseInfo = () => {
       setInfoText(questionData[round].text);
-      setRoundText(`${round + 1} | ${roundText}`);
+      setRoundText(`${round + 1} | ${questionData.length}`);
       fillBars();
    };
 
@@ -83,35 +92,32 @@ export default function page() {
          randomNumber = Math.floor(Math.random() * rankIndex.length);
          randomNumberComputer = Math.floor(Math.random() * rankIndexComputer.length);
          _barText.push(questionData[round].options[rankIndex[randomNumber]]); // fill bars with terms
-         console.log("test", questionData[round].options[rankIndex[randomNumber]]);
          selectionComputer.push(rankIndexComputer[randomNumberComputer]); // fill array with random numbers for the computer answers
          rankIndex.splice(randomNumber, 1);
          rankIndexComputer.splice(randomNumberComputer, 1);
+         jsAnswer.current = selectionComputer;
       }
-      console.log(_barText);
       setBarText(_barText);
       countdown();
    };
 
-   const handleRotateCard = () => {
-      console.log("handleRotateCard");
+   const handleRotateCard = async () => {
       if (cardClass === "card__content card--rotate") {
          setSolutionStyle(null);
          setTimeout(() => {
             setCardClass("card__content");
          }, 300);
-         console.log("inside if");
 
          if (round + 1 === questionData.length) {
             // If quiz is finished
-            setAverageScore(playerScore / questionData.length);
+            const averageScore = playerScore / questionData.length;
             const medalOne = (questionData.length * 25 * 33) / 100;
             const medalTwo = (questionData.length * 25 * 66) / 100;
             // setHighscores();
             setFinishedQuiz(true);
             setBookStyle({ display: "none" });
             setButtonCardStyle({ visibility: "hidden" });
-            setInfoText(`You did it, you just finished the quiz! You scored ${averageScore} points on average.`);
+            setInfoText(`You made it to the last question and just finished the quiz! Your average score was ${averageScore} points.`);
             if (playerScore < medalOne) {
                setMedal1Class("medal1");
             } else if (playerScore < medalTwo) {
@@ -122,6 +128,14 @@ export default function page() {
                setMedal2Class("medal2");
                setMedal3Class("medal3");
             }
+            await saveScore({ id: user._id, score: playerScore, rounds: round + 1 });
+            const updatedData = await getUsers();
+            const sortedUsers = updatedData.result.sort((a, b) => {
+               return b.score - a.score;
+            });
+            const topUsers = sortedUsers.slice(0, 10);
+            setData(topUsers);
+         } else {
             resetCard();
          }
       } else {
@@ -134,6 +148,12 @@ export default function page() {
       }
    };
 
+   const resetCard = () => {
+      setRound(round + 1);
+      setInfoText(`Get ready for round ${round + 2}`);
+      setCardBackClass("card__back");
+   };
+
    const countdown = () => {
       const levels = { easy: 45, fair: 30, challenging: 20 };
       let myTime = levels[user.level];
@@ -141,41 +161,30 @@ export default function page() {
       const myCountdown = setInterval(() => {
          if (myTime === 5) {
             setMyTimerStyle({ color: "#e44803" });
-            //  audio.play();
-            //  audio.volume = 0.1;
+            audio.play();
+            audio.volume = 0.1;
          }
          setMyTimer(myTime);
          myTime--;
          if (myTime < 0) {
             clearInterval(myCountdown);
-            //  barText.forEach((element)=>{
-            //      element.setAttribute('draggable', 'false');
-            //      element.classList.remove('draggable');
-            //  });
-            console.log("before solution");
             showSolution();
+            sessionStorage.setItem("status", "started");
          }
       }, 1000);
    };
 
    const showSolution = () => {
-      const solutionArr = barText.map((text, index) => {
-         const answerIndex = questionData[round].options.indexOf(text);
-         console.log({ answerIndex });
-         const result = barText[answerIndex];
-         console.log({ result });
-         return result;
-      });
-      // setSolution(solutionArr);
       setSolutionStyle({ visibility: "visible" });
       setSolutionClass("solution solution--slide");
       setButtonCardDisabled(false);
-      console.log({ solutionArr });
    };
 
    function validateAnswers() {
       let score = 0;
+      let _jsScore = 0;
       const validation = barText.map((text, index) => {
+         if (jsAnswer.current[index] === index) _jsScore += 5;
          if (text === questionData[round].options[index]) {
             score += 5;
             return { solution: questionData[round].solutions[index], rank: index + 1, score: 5 };
@@ -183,14 +192,17 @@ export default function page() {
          const solutionIndex = questionData[round].options.indexOf(text);
          return { solution: questionData[round].solutions[solutionIndex], rank: solutionIndex + 1, score: 0 };
       });
-      console.log("validation, score", [...validation, score]);
+      if (score === 25) {
+         setCardBackClass("card__back full-house");
+      }
       setAnswer([...validation, score]);
       setButtonCard("button-card-active");
       setButtonCardStyle(null);
+      setPlayerScore(playerScore + score);
+      setJsScore(jsScore + _jsScore);
    }
 
    const handleDragEnd = (event) => {
-      console.log("Drag end called");
       const { active, over } = event;
 
       if (active.id != over.id && myTimer > 0) {
@@ -215,7 +227,7 @@ export default function page() {
                </div>
                <div className="comp">
                   <div id="comp-value" className="comp-value">
-                     0
+                     {jsScore}
                   </div>
                   <p className="comp-badge">JS</p>
                </div>
@@ -232,33 +244,54 @@ export default function page() {
          </header>
 
          <section className="main">
-            <div className="high-scores">
+            <div className={highScoresClass}>
                <h2>Leaderboard</h2>
                <div className="divider"></div>
-               <div className="high-scores__names"></div>
-               <div className="high-scores__points"></div>
+               <div className="high-scores__names">
+                  {data.map((user, index) => (
+                     <div key={index} className="scoresContainer">
+                        <div className="wrapperLeft">
+                           <p>{user.name}</p>
+                           <p>
+                              {user.level}, rounds: {user.rounds}
+                           </p>
+                        </div>
+                        <div className="wrapperright">
+                           <p>{user.score}</p>
+                        </div>
+                     </div>
+                  ))}
+               </div>
                <button className="high-scores__grabber" onClick={handleSlideScoreboard}>
-                  <i className="fas fa-grip-lines-vertical"></i>
+                  <i className="fas fa-grip-lines-vertical">
+                     <Image src={grip} alt="scoreboard handle" />
+                  </i>
                </button>
             </div>
             <div className="card">
                <div className={cardClass}>
                   <div className="card__front">
                      <div className={medal1Class}>
-                        <i className="fas fa-medal"></i>
+                        <i className="fas fa-medal">
+                           <Image src={medal} alt="medal" />
+                        </i>
                      </div>
                      <div className={medal2Class}>
-                        <i className="fas fa-medal"></i>
+                        <i className="fas fa-medal">
+                           <Image src={medal} alt="medal" />
+                        </i>
                      </div>
                      <div className={medal3Class}>
-                        <i className="fas fa-medal"></i>
+                        <i className="fas fa-medal">
+                           <Image src={medal} alt="medal" />
+                        </i>
                      </div>
                      <div className="book" style={bookStyle}>
                         <i className="fas fa-book-open"></i>
                      </div>
                   </div>
                   <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-                     <div className={answer[5] === 25 ? "card__back full-house" : "card__back"}>
+                     <div className={cardBackClass}>
                         <SortableContext items={barText} strategy={verticalListSortingStrategy}>
                            {barText.map((text, index) => (
                               <Sortable key={index} text={text} solutionClass={solutionClass} solutionStyle={solutionStyle} answer={answer} index={index} />

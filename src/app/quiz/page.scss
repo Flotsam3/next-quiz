@@ -178,14 +178,14 @@ body {
 
 			.high-scores__grabber {
 				position: absolute;
-				height: 30px;
+				height: 450px;
 				width: 20px;
 				right: -25px;
 				border: none;
 				background-color: transparent;
-
-				i {
-					font-size: 2rem;
+			
+				img {
+					width: 1vw;
 					color: $colour-main-dark;
 					cursor: pointer;
 				}
@@ -213,8 +213,16 @@ body {
 			.high-scores__names {
 				padding-top: 25%;
 				padding-left: 10px;
+				padding-right: 10px;
 				height: 95%;
-				width: 65%;
+				width: 95%;
+				.scoresContainer {
+					display: flex;
+					justify-content: space-between;
+					.wrapperLeft p:nth-of-type(2){
+						font-size: 0.8rem;
+					}
+				}
 			}
 
 			.high-scores__names p {
@@ -320,9 +328,8 @@ body {
 						border-radius: 50%;
 					}
 				}
-				.card__front i {
-					font-size: calc(max(40px, 4vw));
-					color: $colour-main-medium-light;
+				.card__front img {
+					width: 5vw;
 				}
 				.card__back {
 					transform: rotateY(180deg);

@@ -3,9 +3,9 @@ import "../../../lib/connect_db.js";
 import { createUser, getUsers } from "../../../controllers/userController.js";
 
 export const POST = async (request) => {
-   const { name, level } = await request.json();
+   const { name, level, rounds } = await request.json();
    try {
-      const response = await createUser({ name, level });
+      const response = await createUser({ name, level, rounds });
       return new Response(JSON.stringify(response));
    } catch (error) {
       return new NextResponse(error.message, { status: 500 });

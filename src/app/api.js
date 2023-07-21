@@ -27,3 +27,20 @@ export const getUsers = async () => {
       console.log("In catch block", error);
    }
 };
+
+export const saveScore = async (data) => {
+   try {
+      const response = await fetch("/api/play", {
+         method: "POST",
+         headers: {
+            "Content-Type": "application/json; charset=utf8",
+         },
+         body: JSON.stringify(data),
+      });
+      const resData = await response.json();
+      console.log({ response, resData });
+      return resData;
+   } catch (error) {
+      console.log("In catch block", error);
+   }
+};

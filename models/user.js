@@ -12,6 +12,10 @@ const schema = new mongoose.Schema({
       type: Number,
       default: 0,
    },
+   rounds: {
+      type: Number,
+      default: 0,
+   },
 });
 
 const User = mongoose.models.quizUser || mongoose.model("quizUser", schema);

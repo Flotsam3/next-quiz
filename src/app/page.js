@@ -1,8 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-// import Image from "next/image";
 import "./page.scss";
 import { createUser, getUsers } from "./api";
 
@@ -23,8 +22,12 @@ export default function Home() {
    const [pane, setPane] = useState(false);
    const [paneClass, setPaneClass] = useState("pane");
    const [buttonInfo, setButtonInfo] = useState({ visibility: "hidden" });
-   // const [aTagClass, setATagClass] = useState(null);
    const [levelTime, setLevelTime] = useState("45");
+
+   useEffect(() => {
+      sessionStorage.removeItem("user");
+      sessionStorage.removeItem("status");
+   }, []);
 
    function cubeTimeout() {
       setTimeout(() => {
@@ -64,14 +67,13 @@ export default function Home() {
       setShowCube(false);
       setCubeTop(null);
       setScene("scene --fade-out");
-      const user = await createUser({ name, level });
+      const user = await createUser({ name, level, rounds: 0 });
       sessionStorage.setItem("user", JSON.stringify(user.result));
 
       setTimeout(() => {
          setPane(true);
          setButtonInfo(null);
          setPaneClass("pane --fade-in");
-         // setATagClass("--fade-in");
       }, 2000);
    }
 
