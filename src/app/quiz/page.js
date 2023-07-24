@@ -41,6 +41,7 @@ export default function Page() {
    const [highScoresClass, setHighScoresClass] = useState("high-scores");
    const [answer, setAnswer] = useState([{ solution: "", rank: null, score: 0 }]);
    const [sound, setSound] = useState(null);
+   const [draggable, setDraggable] = useState(false);
    const jsAnswer = useRef(0);
 
    useEffect(() => {
@@ -156,6 +157,7 @@ export default function Page() {
       setRound(round + 1);
       setInfoText(`Get ready for round ${round + 2}`);
       setCardBackClass("card__back");
+      setDraggable(false);
    };
 
    const countdown = () => {
@@ -173,6 +175,7 @@ export default function Page() {
          if (myTime < 0) {
             clearInterval(myCountdown);
             showSolution();
+            setDraggable(true);
             sessionStorage.setItem("status", "started");
          }
       }, 1000);
@@ -298,7 +301,7 @@ export default function Page() {
                      <div className={cardBackClass}>
                         <SortableContext items={barText} strategy={verticalListSortingStrategy}>
                            {barText.map((text, index) => (
-                              <Sortable key={index} text={text} solutionClass={solutionClass} solutionStyle={solutionStyle} answer={answer} index={index} />
+                              <Sortable key={index} text={text} solutionClass={solutionClass} solutionStyle={solutionStyle} answer={answer} index={index} draggable={draggable} />
                            ))}
                         </SortableContext>
                      </div>

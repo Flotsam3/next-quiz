@@ -1,8 +1,8 @@
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 
-export default function Sortable({ text, solutionClass, solutionStyle, answer, index }) {
-   const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id: text });
+export default function Sortable({ text, solutionClass, solutionStyle, answer, index, draggable }) {
+   const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id: text, disabled: draggable });
    const style = { transform: CSS.Transform.toString(transform) };
 
    return (
