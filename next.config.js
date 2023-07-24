@@ -13,11 +13,10 @@ const nextConfig = {
          },
       });
 
-      // For server-side rendering of the audio file
-      if (!isServer) {
-         config.node = {
-            fs: "empty",
-         };
+      // If you are using server-side rendering (SSR)
+      if (isServer) {
+         // Fixes npm packages that depend on `fs` module
+         config.externals.push({ fs: "empty" });
       }
 
       return config;
