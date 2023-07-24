@@ -11,6 +11,7 @@ import questionData from "../../../json/data.json" assert { type: "json" };
 import { DndContext, closestCenter } from "@dnd-kit/core";
 import { arrayMove, SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import Sortable from "./Sortable";
+import countdownSound from "../../../public/audio/5-sec-countdown.mp3";
 
 export default function Page() {
    // const audio = new Audio("../../../public/audio/5-sec-countdown.mp3");
@@ -39,6 +40,7 @@ export default function Page() {
    const [solutionStyle, setSolutionStyle] = useState(null);
    const [highScoresClass, setHighScoresClass] = useState("high-scores");
    const [answer, setAnswer] = useState([{ solution: "", rank: null, score: 0 }]);
+   const [sound, setSound] = useState(null);
    const jsAnswer = useRef(0);
 
    useEffect(() => {
@@ -53,6 +55,8 @@ export default function Page() {
          const topUsers = sortedUsers.slice(0, 10);
          setData(topUsers);
       })();
+
+      setSound(new Audio(countdownSound));
       setUser(JSON.parse(sessionStorage.getItem("user")));
    }, []);
 
@@ -161,8 +165,8 @@ export default function Page() {
       const myCountdown = setInterval(() => {
          if (myTime === 5) {
             setMyTimerStyle({ color: "#e44803" });
-            // audio.play();
-            // audio.volume = 0.1;
+            sound.play();
+            sound.volume = 0.1;
          }
          setMyTimer(myTime);
          myTime--;
