@@ -12,7 +12,7 @@ import { DndContext, closestCenter } from "@dnd-kit/core";
 import { arrayMove, SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import Sortable from "./Sortable";
 
-export default function page() {
+export default function Page() {
    const audio = new Audio("audio/5-sec-countdown.mp3");
    const router = useRouter();
    const [data, setData] = useState([]);

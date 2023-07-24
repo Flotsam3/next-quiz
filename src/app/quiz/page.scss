@@ -642,7 +642,9 @@ body {
 				.card__content {
 					.card__back {
 						.solution {
+							top: 30px;
 							left: 15px;
+							z-index: 1;
 						}
 					}
 				}
