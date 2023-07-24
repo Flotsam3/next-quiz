@@ -7,7 +7,7 @@ import Image from "next/image";
 import medal from "../../../public/images/medal.svg";
 import grip from "../../../public/images/grip-lines.svg";
 import "./page.scss";
-import questionData from "../../../json/data.json" assert { type: "json" };
+import questionData from "../../../json/data2.json" assert { type: "json" };
 import { DndContext, closestCenter } from "@dnd-kit/core";
 import { arrayMove, SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import Sortable from "./Sortable";

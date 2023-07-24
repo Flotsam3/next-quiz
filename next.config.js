@@ -1,7 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
    webpack: (config, { isServer }) => {
-      // Add a rule to handle MP3 files
+      // Add a rule to handle MP3 files (mpn i file-loader needed)
       config.module.rules.push({
          test: /\.(mp3)$/,
          use: {
