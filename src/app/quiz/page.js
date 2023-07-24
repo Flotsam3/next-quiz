@@ -13,7 +13,7 @@ import { arrayMove, SortableContext, verticalListSortingStrategy } from "@dnd-ki
 import Sortable from "./Sortable";
 
 export default function Page() {
-   const audio = new Audio("../../../public/audio/5-sec-countdown.mp3");
+   // const audio = new Audio("../../../public/audio/5-sec-countdown.mp3");
    const router = useRouter();
    const [data, setData] = useState([]);
    const [user, setUser] = useState({});
@@ -161,8 +161,8 @@ export default function Page() {
       const myCountdown = setInterval(() => {
          if (myTime === 5) {
             setMyTimerStyle({ color: "#e44803" });
-            audio.play();
-            audio.volume = 0.1;
+            // audio.play();
+            // audio.volume = 0.1;
          }
          setMyTimer(myTime);
          myTime--;
