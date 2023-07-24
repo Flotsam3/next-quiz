@@ -29,6 +29,7 @@ body {
             padding: 0;
             font-family: $main-font;
             font-size: 4rem;
+            text-align: center;
             animation: title-anim 3s linear infinite;
             z-index: 2;
         }
@@ -319,6 +320,11 @@ small {
         span {
             display: block;
             text-align: center;
+        }
+    }
+    @media only screen and (max-width: 600px) {
+        .pane {
+          margin-top: 15rem;
         }
     }
     
