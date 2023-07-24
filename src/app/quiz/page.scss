@@ -283,6 +283,8 @@ body {
 					width: 100%;
 					border-radius: 10px;
 					backface-visibility: hidden;
+					touch-action: pan-y;
+					touch-action: pan-x;
 
 					.bar {
 						display: flex;
@@ -608,6 +610,7 @@ body {
 		}
 
 		.main {
+			height: auto;
 			.high-scores {
 				height: 85vh;
 				width: 90%;
@@ -619,6 +622,9 @@ body {
 				.high-scores__grabber {
 					top: 47%;
 					transform: translateY(-50%);
+					img {
+						width: 4vw;
+					}
 				}
 
 				.high-scores__names {
@@ -637,7 +643,7 @@ body {
 			.card {
 				height: 55vh;
 				width: 70vw;
-				margin-top: 50%;
+				margin-top: 20%;
 
 				.card__content {
 					.card__back {
