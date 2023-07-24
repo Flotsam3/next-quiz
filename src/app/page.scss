@@ -33,6 +33,12 @@ body {
             animation: title-anim 3s linear infinite;
             z-index: 2;
         }
+        @media only screen and (max-width: 600px) {
+            h1 {
+                top: 5%;
+              font-size: 2.5rem;
+            }
+        }
 
         .scene {
             display: flex;
@@ -324,7 +330,12 @@ small {
     }
     @media only screen and (max-width: 600px) {
         .pane {
-          margin-top: 15rem;
+            height: auto;
+            margin-top: 4rem;
+            margin-bottom: 2rem;
+          p {
+            padding: 0px 30px;
+          }
         }
     }
     
